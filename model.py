@@ -1,6 +1,6 @@
 #TrainingData Class
-from datetime import datetime
-from typing import Iterable, Optional
+import datetime
+from typing import Iterable, Optional, Union
 import weakref
 
 class Sample:
@@ -48,5 +48,81 @@ class Sample:
     def matches(self) ->bool:
         return self.species == self.classification
     
-
+class Hyperparameter:
+    """A hyperparameter value and the overall quality
+        of the classification """      
+    def __init__(self, k:int, training: "TrainingData") -> None:
+        self.k = k
+        self.data: weakref.ReferenceType["TrainingData"] = weakref.ref()
+        self.quality: float
+        
+    def test(self) -> None:
+        """Run the entire test suite."""
+        
+        training_data = Optional["TrainingData"] = self.data()
+        
+        if not training_data:
+            raise RuntimeError("Broken Weak Reference")
+            
+        else:
+            pass_count, fail_count = 0,0
+            for sample in training_data.testing:
+                sample.classification = sample.classify(sample)
+                
+                if sample.matches():
+                    pass_count +=1
+                    
+                else:
+                    fail_count +=1
+                    
+            self.quality = pass_count / (pass_count + fail_count)
     
+class TrainingData:
+    def __init__(self, name: str) -> None:
+        self.name = name
+        self.uploaded: datetime.datetime
+        self.tested: datetime.datetime
+        self.training: list[Sample] = []
+        self.testing: list[Sample] = []
+        # self.tuning: list[Hyperparameter] = []
+
+
+    def load(
+            self,
+            # the type-hint Iterable states that
+            # the method's result can be used
+            # by a for loop or the list function.
+            source: Iterable[dict[str, Union[float,str]]]
+    ) -> None:
+        """
+        this method loads the data
+        and partitions data to training
+        and testing.
+        """
+        for n, row in enumerate(source):
+            pass
+
+        self.uploaded = datetime.datetime.now(tz=datetime.timezone.utc)
+
+
+    def test(
+        self,
+        parameter: Hyperparameter
+    ) -> None:
+        """Test the hyperparameter value"""
+
+        parameter.test()
+        self.tuning.append(parameter)
+        self.tested = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    def classify(
+        self,
+        parameter: Hyperparameter,
+        sample: Sample
+    ) -> Sample:
+        """Classify the Sample."""
+        classification = parameter.classify(sample)
+        sample.classify(classification)
+
+        return sample
+
